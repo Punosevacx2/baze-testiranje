@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class NotificationPublisher {
 
-    private final RedisTemplate<String, String> redisTemplate;
+	 private final RedisTemplate<String, Object> redisTemplate;
 
-    public NotificationPublisher(RedisTemplate<String, String> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
+	    public NotificationPublisher(RedisTemplate<String, Object> redisTemplate) {
+	        this.redisTemplate = redisTemplate;
+	    }
 
-    public void publish(String message) {
-        redisTemplate.convertAndSend("notifications", message);
-    }
-}
+	    public void publish(String message) {
+	        redisTemplate.convertAndSend("notifications", message);
+	    }
+	}
