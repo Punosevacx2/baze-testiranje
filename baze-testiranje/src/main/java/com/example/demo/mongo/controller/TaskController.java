@@ -1,6 +1,7 @@
 package com.example.demo.mongo.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,17 +14,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.DTO.TaskDTO;
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.mongo.entities.Task;
+import com.example.demo.mongo.entities.User;
 import com.example.demo.mongo.service.TaskService;
+import com.example.demo.neo4j.entities.TaskNode;
+import com.example.demo.neo4j.entities.UserNode;
+import com.example.demo.neo4j.service.TaskNodeService;
 
 @RestController
 @RequestMapping("/tasks")
 @CrossOrigin
 public class TaskController {
     private final TaskService taskService;
+    private final TaskNodeService taskNodeService;
 
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskService taskService,TaskNodeService taskNodeService) {
         this.taskService = taskService;
+        this.taskNodeService=taskNodeService;
     }
 
     @GetMapping
@@ -32,15 +41,26 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getById(@PathVariable String id) {
-        return taskService.getTaskById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+    public ResponseEntity<TaskDTO> getById(@PathVariable String id) {
+    	Optional<Task> mongoTaskOpt = taskService.getTaskById(id);
+        Optional<TaskNode> neo4jTaskOpt = taskNodeService.getTaskById(id);
+
+        if (mongoTaskOpt.isEmpty() || neo4jTaskOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        TaskDTO dto = new TaskDTO(mongoTaskOpt.get(), neo4jTaskOpt.get());
+        return ResponseEntity.ok(dto);
+        }
 
     @PostMapping
     public Task create(@RequestBody Task task) {
-        return taskService.createTask(task);
+    	Task savedTask = taskService.createTask(task);
+
+        TaskNode taskNode = new TaskNode(savedTask.getId());
+        taskNodeService.createTask(taskNode);
+
+        return savedTask;
     }
 
     @PutMapping("/{id}")
@@ -51,6 +71,7 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         taskService.deleteTask(id);
+        taskNodeService.deleteTask(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -18,7 +18,9 @@ public class UserNode {
 
     @Relationship(type = "REPORTS_TO")
     private UserNode manager;
-
+    
+    @Relationship(type = "WORKS_ON")
+    private Set<ProjectNode> projects = new HashSet<>();
     // Constructors, getters, setters
 
     public UserNode() {}
@@ -35,4 +37,15 @@ public class UserNode {
 
     public UserNode getManager() { return manager; }
     public void setManager(UserNode manager) { this.manager = manager; }
+
+	public Object getUsername() {
+		return manager;
+	}
+
+	public Set<ProjectNode> getProjects() {
+		
+		return projects;
+	}
+
+	
 }

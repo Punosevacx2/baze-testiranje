@@ -1,6 +1,7 @@
 package com.example.demo.mongo.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,17 +14,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.DTO.ProjectDTO;
 import com.example.demo.mongo.entities.Project;
 import com.example.demo.mongo.service.ProjectService;
+import com.example.demo.neo4j.entities.ProjectNode;
+import com.example.demo.neo4j.service.ProjectNodeService;
 
 @RestController
 @RequestMapping("/projects")
 @CrossOrigin
 public class ProjectController {
     private final ProjectService projectService;
+    private final ProjectNodeService projectNodeService;
 
-    public ProjectController(ProjectService projectService) {
+    public ProjectController(ProjectService projectService,
+    						ProjectNodeService projectNodeService) {
         this.projectService = projectService;
+        this.projectNodeService=projectNodeService;
     }
 
     @GetMapping
@@ -32,15 +39,26 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Project> getById(@PathVariable String id) {
-        return projectService.getProjectById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ProjectDTO> getById(@PathVariable String id) {
+    	Optional<Project> mongoProjectOpt = projectService.getProjectById(id);
+        Optional<ProjectNode> neo4jProjectOpt = projectNodeService.getProjectById(id);
+
+        if (mongoProjectOpt.isEmpty() || neo4jProjectOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        ProjectDTO dto = new ProjectDTO(mongoProjectOpt.get(), neo4jProjectOpt.get());
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping
     public Project create(@RequestBody Project project) {
-        return projectService.createProject(project);
+    	Project savedProject = projectService.createProject(project);
+
+    	ProjectNode projectNode = new ProjectNode(savedProject.getId());
+    	projectNodeService.createProject(projectNode);
+
+        return savedProject;
     }
 
     @PutMapping("/{id}")
@@ -51,6 +69,7 @@ public class ProjectController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         projectService.deleteProject(id);
+        projectNodeService.deleteProject(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,6 +1,7 @@
 package com.example.demo.mongo.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,17 +14,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.mongo.entities.User;
 import com.example.demo.mongo.service.UserService;
+import com.example.demo.neo4j.entities.UserNode;
+import com.example.demo.neo4j.service.UserNodeService;
 
 @RestController
 @RequestMapping("/users")
 @CrossOrigin
 public class UserController {
     private final UserService userService;
+    private final UserNodeService userNodeService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService,
+    						UserNodeService userNodeService) {
         this.userService = userService;
+        this.userNodeService=userNodeService;
     }
 
     @GetMapping
@@ -32,15 +39,26 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getById(@PathVariable String id) {
-        return userService.getUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<UserDTO> getById(@PathVariable String id) {
+        Optional<User> mongoUserOpt = userService.getUserById(id);
+        Optional<UserNode> neo4jUserOpt = userNodeService.getUserById(id);
+
+        if (mongoUserOpt.isEmpty() || neo4jUserOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        UserDTO dto = new UserDTO(mongoUserOpt.get(), neo4jUserOpt.get());
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping
     public User create(@RequestBody User user) {
-        return userService.createUser(user);
+    	User savedUser = userService.createUser(user);
+
+        UserNode userNode = new UserNode(savedUser.getId());
+        userNodeService.createUserNode(userNode);
+
+        return savedUser;
     }
 
     @PutMapping("/{id}")
@@ -51,6 +69,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         userService.deleteUser(id);
+        userNodeService.deleteUserNode(id);
         return ResponseEntity.noContent().build();
     }
 }

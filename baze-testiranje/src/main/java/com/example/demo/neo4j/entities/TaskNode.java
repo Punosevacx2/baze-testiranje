@@ -15,6 +15,12 @@ public class TaskNode {
 
     @Relationship(type = "DEPENDS_ON")
     private Set<TaskNode> dependencies = new HashSet<>();
+    
+    @Relationship(type = "PART_OF")
+    private ProjectNode project;
+    
+    @Relationship(type = "WORKS_ON")
+    private Set<ProjectNode> projects = new HashSet<>();
 
     // Constructors, getters, setters
 
@@ -29,4 +35,8 @@ public class TaskNode {
 
     public Set<TaskNode> getDependencies() { return dependencies; }
     public void setDependencies(Set<TaskNode> dependencies) { this.dependencies = dependencies; }
+
+	public void setProject(ProjectNode project2) {
+		project=project2;
+	}
 }

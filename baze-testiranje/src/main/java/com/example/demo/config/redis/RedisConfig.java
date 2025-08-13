@@ -3,11 +3,10 @@ package com.example.demo.config.redis;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
-import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.ChannelTopic;
 
 import com.example.demo.redis.RedisSubscriber;
 
@@ -15,11 +14,25 @@ import com.example.demo.redis.RedisSubscriber;
 public class RedisConfig {
 
     @Bean
-    public RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory, RedisSubscriber subscriber) {
+    public ChannelTopic topic() {
+        return new ChannelTopic("notifications");
+    }
+
+    @Bean
+    public RedisMessageListenerContainer redisContainer(
+            RedisConnectionFactory connectionFactory,
+            MessageListenerAdapter listenerAdapter,
+            ChannelTopic topic) {
+
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(subscriber, new PatternTopic("notifications"));
+        container.addMessageListener(listenerAdapter, topic);
         return container;
+    }
+
+    @Bean
+    public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "onMessage");
     }
 
     @Bean

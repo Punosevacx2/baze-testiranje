@@ -33,4 +33,9 @@ public class Task {
     public void setId(String id2) {
 		id=id2;
 	}
+
+
+	public String getId() {
+		return id;
+	}
 }

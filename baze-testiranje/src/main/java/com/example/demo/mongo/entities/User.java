@@ -2,32 +2,127 @@ package com.example.demo.mongo.entities;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Document(collection = "users")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Setter
-@Getter
-public class User {
-    @Id
-    private String id;
+public class User implements UserDetails {
+
+	 @Id
+	    private String id;
+
+	    private String email;
+	    private String username;
+	    private String firstName;
+	    private String lastName;
+	    private String country;
+	    private String city;
+	    private String postalCode;
+	    private String password;
+
+	   private List<Role> roles;
+
+    public User() {}
+
+    public User(String username, String email, String password, List<Role> roles) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
+    }
+
     
-    private String username;
-    
-    private String email;
-    
-    private String role;
-    
-    
-	public void setId(String id2) {
-		id=id2;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return true; }
+
+	public void setEmail(String email2) {
+		email=email2;
 		
-	} 
+	}
+
+	public void setUsername(String username2) {
+	username=username2;
+		
+	}
+
+	public void setFirstName(String object) {
+		firstName=object;
+		
+	}
+
+	public void setLastName(String object) {
+		lastName=object;
+		
+	}
+
+	public void setCountry(String string) {
+		country=string;
+		
+	}
+
+	public void setCity(String string) {
+		city=string;
+		
+	}
+
+	public void setPostalCode(String string) {
+		postalCode=string;
+		
+	}
+
+	public void setPassword(String encode) {
+		password=encode;
+		
+	}
+
+	public String getId() {
+		// TODO Auto-generated method stub
+		return id;
+	}
+
+	public void setId(String id2) {
+		// TODO Auto-generated method stub
+		id=id2;
+	}
+
+	public void setRoles(List<Role> asList) {
+		// TODO Auto-generated method stub
+		roles=asList;
+	}
 }
