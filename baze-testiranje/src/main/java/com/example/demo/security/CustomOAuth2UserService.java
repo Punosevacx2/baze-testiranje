@@ -16,6 +16,7 @@ import com.example.demo.mongo.entities.Role;
 import com.example.demo.mongo.entities.User;
 import com.example.demo.mongo.repository.RoleRepository;
 import com.example.demo.mongo.repository.UserRepository;
+import com.example.demo.security.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,7 +40,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new RuntimeException("Email not found from OAuth2 provider");
         }
 
-        Optional<Optional<User>> optionalUser = Optional.ofNullable(userRepository.findById(email));
+        Optional<User> optionalUser = userRepository.findById(email);
 
         if (optionalUser.isEmpty()) {
             // Korisnik ne postoji -> kreiraj ga
@@ -57,9 +58,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             // Postavi default rolu
             Role userRole = roleRepository.findByName("ROLE_USER");
-
-            newUser.setRoles(Arrays.asList(userRole));
-
+            newUser.setRoles(userRole);
 
             userRepository.save(newUser);
         }

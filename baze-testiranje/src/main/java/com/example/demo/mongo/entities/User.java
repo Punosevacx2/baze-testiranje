@@ -6,7 +6,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.example.demo.mongo.entities.Role;
+
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,23 +29,27 @@ public class User implements UserDetails {
 	    private String postalCode;
 	    private String password;
 
-	   private List<Role> roles;
+	   private Role roles;
 
     public User() {}
 
-    public User(String username, String email, String password, List<Role> roles) {
+    public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.roles = roles;
+        this.roles = new Role();
+        roles.setName("ROLE_USER");
     }
 
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
+        if (this.roles == null || this.roles.getName() == null) {
+            return Collections.emptyList(); // ako nema role
+        }
+        return Collections.singletonList(
+            new SimpleGrantedAuthority(this.roles.getName())
+        );
     }
 
     @Override
@@ -121,8 +128,8 @@ public class User implements UserDetails {
 		id=id2;
 	}
 
-	public void setRoles(List<Role> asList) {
+	public void setRoles(Role role) {
 		// TODO Auto-generated method stub
-		roles=asList;
+		roles=role;
 	}
 }
