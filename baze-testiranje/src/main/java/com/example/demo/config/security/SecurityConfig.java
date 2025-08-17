@@ -27,7 +27,7 @@ public class SecurityConfig {
 	            .authorizeHttpRequests(auth -> auth
 	            	.requestMatchers("/admin/**").hasRole("ADMIN")
 	            	.requestMatchers("/projects/**","/tasks/**","/users/**").hasAnyRole("USER")
-	                .requestMatchers("/register", "/login", "/css/**","/js/**","/change-language","/ws/**", "/topic/**").permitAll()
+	                .requestMatchers("/api/**","/register", "/login", "/css/**","/js/**","/change-language","/ws/**", "/users/**").permitAll()
 	                .anyRequest().authenticated()
 	            )
 	            .oauth2Login(oauth2 -> oauth2

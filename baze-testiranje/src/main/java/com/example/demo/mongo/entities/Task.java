@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.example.demo.enumeration.TaskStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +27,7 @@ public class Task {
     
     private String projectId;        // Project.id
     
-    private String status;           
+    private TaskStatus status;           
     
     private LocalDate deadline;
 	

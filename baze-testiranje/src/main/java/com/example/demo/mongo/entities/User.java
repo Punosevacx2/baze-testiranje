@@ -33,12 +33,11 @@ public class User implements UserDetails {
 
     public User() {}
 
-    public User(String username, String email, String password) {
+    public User(String username, String email, String password,Role role) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.roles = new Role();
-        roles.setName("ROLE_USER");
+        this.roles = role;
     }
 
     
@@ -131,5 +130,10 @@ public class User implements UserDetails {
 	public void setRoles(Role role) {
 		// TODO Auto-generated method stub
 		roles=role;
+	}
+
+	public Role getRoles() {
+		// TODO Auto-generated method stub
+		return roles;
 	}
 }

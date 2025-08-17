@@ -114,19 +114,14 @@ public class RelationService {
         }
         
         
-    @Transactional
-    public boolean setManager(String userId, String managerId) {
-        Optional<UserNode> userOpt = userNodeRepository.findById(userId);
-        Optional<UserNode> managerOpt = userNodeRepository.findById(managerId);
-
-        if (userOpt.isEmpty() || managerOpt.isEmpty()) return false;
-
-        UserNode user = userOpt.get();
-        UserNode manager = managerOpt.get();
-
-        user.setManager(manager);
-        userNodeRepository.save(user);
-
-        return true;
-    }
+//    @Transactional
+//    public boolean setManager(String userId, String managerId) {
+//        Optional<UserNode> userOpt = userNodeRepository.findById(userId);
+//        if (userOpt.isEmpty() ) return false;
+//
+//        UserNode user = userOpt.get();
+//        userNodeRepository.save(user);
+//
+//        return true;
+//    }
 }

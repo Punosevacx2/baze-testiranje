@@ -3,11 +3,11 @@ package com.example.demo.DTO;
 import com.example.demo.mongo.entities.Project;
 import com.example.demo.neo4j.entities.ProjectNode;
 
-public class ProjectDTO {
+public class Projectdto {
 	private Project project;
     private ProjectNode projectNode;
 
-    public ProjectDTO(Project project, ProjectNode projectNode) {
+    public Projectdto(Project project, ProjectNode projectNode) {
         this.project = project;
         this.projectNode = projectNode;
     }

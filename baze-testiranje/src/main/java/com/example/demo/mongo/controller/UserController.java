@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.DTO.UserDTO;
+import com.example.demo.DTO.Userdto;
 import com.example.demo.mongo.entities.User;
 import com.example.demo.mongo.service.UserService;
 import com.example.demo.neo4j.entities.UserNode;
@@ -34,14 +34,16 @@ public class UserController {
         this.userNodeService=userNodeService;
     }
 
+ 
+    
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public List<User> getAll() {
         return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getById(@PathVariable String id) {
+    public ResponseEntity<Userdto> getById(@PathVariable String id) {
         Optional<User> mongoUserOpt = userService.getUserById(id);
         Optional<UserNode> neo4jUserOpt = userNodeService.getUserById(id);
 
@@ -49,7 +51,7 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
 
-        UserDTO dto = new UserDTO(mongoUserOpt.get(), neo4jUserOpt.get());
+        Userdto dto = new Userdto(mongoUserOpt.get(), neo4jUserOpt.get());
         return ResponseEntity.ok(dto);
     }
 

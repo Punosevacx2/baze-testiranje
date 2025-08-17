@@ -32,10 +32,10 @@ public class RelationController {
         else return ResponseEntity.badRequest().body("Task or dependency not found");
     }
 
-    @PostMapping("/user/{id}/manager/{managerId}")
-    public ResponseEntity<String> setManager(@PathVariable String id, @PathVariable String managerId) {
-        boolean success = relationService.setManager(id, managerId);
-        if (success) return ResponseEntity.ok("Manager set");
-        else return ResponseEntity.badRequest().body("User or manager not found");
-    }
+//    @PostMapping("/user/{id}/manager/{managerId}")
+//    public ResponseEntity<String> setManager(@PathVariable String id, @PathVariable String managerId) {
+//        boolean success = relationService.setManager(id, managerId);
+//        if (success) return ResponseEntity.ok("Manager set");
+//        else return ResponseEntity.badRequest().body("User or manager not found");
+//    }
 }

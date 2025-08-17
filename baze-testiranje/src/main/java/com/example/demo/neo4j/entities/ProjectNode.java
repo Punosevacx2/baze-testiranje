@@ -15,7 +15,7 @@ public class ProjectNode {
 
     @Relationship(type = "HAS_TASK")
     private Set<TaskNode> tasks = new HashSet<>();
-
+    
     @Relationship(type = "HAS_MEMBER")
     private Set<UserNode> members = new HashSet<>();
 

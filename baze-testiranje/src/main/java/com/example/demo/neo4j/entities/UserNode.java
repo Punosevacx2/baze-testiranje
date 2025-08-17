@@ -16,8 +16,6 @@ public class UserNode {
     @Relationship(type = "COLLABORATES_WITH")
     private Set<UserNode> collaborators = new HashSet<>();
 
-    @Relationship(type = "REPORTS_TO")
-    private UserNode manager;
     
     @Relationship(type = "WORKS_ON")
     private Set<ProjectNode> projects = new HashSet<>();
@@ -35,11 +33,9 @@ public class UserNode {
     public Set<UserNode> getCollaborators() { return collaborators; }
     public void setCollaborators(Set<UserNode> collaborators) { this.collaborators = collaborators; }
 
-    public UserNode getManager() { return manager; }
-    public void setManager(UserNode manager) { this.manager = manager; }
-
+    
 	public Object getUsername() {
-		return manager;
+		return id;
 	}
 
 	public Set<ProjectNode> getProjects() {

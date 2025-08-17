@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.DTO.TaskDTO;
-import com.example.demo.DTO.UserDTO;
+import com.example.demo.DTO.Taskdto;
+import com.example.demo.DTO.Userdto;
 import com.example.demo.mongo.entities.Task;
 import com.example.demo.mongo.entities.User;
 import com.example.demo.mongo.service.TaskService;
@@ -43,7 +43,7 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TaskDTO> getById(@PathVariable String id) {
+    public ResponseEntity<Taskdto> getById(@PathVariable String id) {
     	Optional<Task> mongoTaskOpt = taskService.getTaskById(id);
         Optional<TaskNode> neo4jTaskOpt = taskNodeService.getTaskById(id);
 
@@ -51,7 +51,7 @@ public class TaskController {
             return ResponseEntity.notFound().build();
         }
 
-        TaskDTO dto = new TaskDTO(mongoTaskOpt.get(), neo4jTaskOpt.get());
+        Taskdto dto = new Taskdto(mongoTaskOpt.get(), neo4jTaskOpt.get());
         return ResponseEntity.ok(dto);
         }
 

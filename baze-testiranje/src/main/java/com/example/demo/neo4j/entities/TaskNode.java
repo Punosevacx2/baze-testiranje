@@ -19,10 +19,6 @@ public class TaskNode {
     @Relationship(type = "PART_OF")
     private ProjectNode project;
     
-    @Relationship(type = "WORKS_ON")
-    private Set<ProjectNode> projects = new HashSet<>();
-
-    // Constructors, getters, setters
 
     public TaskNode() {}
 

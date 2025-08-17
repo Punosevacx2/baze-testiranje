@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.DTO.ProjectDTO;
+import com.example.demo.DTO.Projectdto;
 import com.example.demo.mongo.entities.Project;
 import com.example.demo.mongo.service.ProjectService;
 import com.example.demo.neo4j.entities.ProjectNode;
@@ -41,7 +41,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectDTO> getById(@PathVariable String id) {
+    public ResponseEntity<Projectdto> getById(@PathVariable String id) {
     	Optional<Project> mongoProjectOpt = projectService.getProjectById(id);
         Optional<ProjectNode> neo4jProjectOpt = projectNodeService.getProjectById(id);
 
@@ -49,7 +49,7 @@ public class ProjectController {
             return ResponseEntity.notFound().build();
         }
 
-        ProjectDTO dto = new ProjectDTO(mongoProjectOpt.get(), neo4jProjectOpt.get());
+        Projectdto dto = new Projectdto(mongoProjectOpt.get(), neo4jProjectOpt.get());
         return ResponseEntity.ok(dto);
     }
 
