@@ -46,7 +46,6 @@ public class TaskController {
     public ResponseEntity<Taskdto> getById(@PathVariable String id) {
     	Optional<Task> mongoTaskOpt = taskService.getTaskById(id);
         Optional<TaskNode> neo4jTaskOpt = taskNodeService.getTaskById(id);
-
         if (mongoTaskOpt.isEmpty() || neo4jTaskOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -58,10 +57,8 @@ public class TaskController {
     @PostMapping
     public Task create(@RequestBody Task task) {
     	Task savedTask = taskService.createTask(task);
-
         TaskNode taskNode = new TaskNode(savedTask.getId());
         taskNodeService.createTask(taskNode);
-
         return savedTask;
     }
 

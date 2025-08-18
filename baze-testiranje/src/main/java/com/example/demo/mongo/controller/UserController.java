@@ -46,11 +46,11 @@ public class UserController {
     public ResponseEntity<Userdto> getById(@PathVariable String id) {
         Optional<User> mongoUserOpt = userService.getUserById(id);
         Optional<UserNode> neo4jUserOpt = userNodeService.getUserById(id);
-
+        System.out.println(mongoUserOpt.toString());
         if (mongoUserOpt.isEmpty() || neo4jUserOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-
+        
         Userdto dto = new Userdto(mongoUserOpt.get(), neo4jUserOpt.get());
         return ResponseEntity.ok(dto);
     }

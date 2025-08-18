@@ -43,12 +43,7 @@ public class User implements UserDetails {
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (this.roles == null || this.roles.getName() == null) {
-            return Collections.emptyList(); // ako nema role
-        }
-        return Collections.singletonList(
-            new SimpleGrantedAuthority(this.roles.getName())
-        );
+        return List.of(new SimpleGrantedAuthority("ROLE_" + roles));
     }
 
     @Override
