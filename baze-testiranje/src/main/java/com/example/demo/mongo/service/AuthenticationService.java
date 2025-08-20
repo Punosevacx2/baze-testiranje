@@ -11,7 +11,8 @@ import com.example.demo.mongo.entities.Role;
 import com.example.demo.mongo.entities.User;
 import com.example.demo.mongo.repository.RoleRepository;
 import com.example.demo.mongo.repository.UserRepository;
-import java.util.stream.Collectors;
+
+import java.util.Optional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,19 +34,20 @@ public class AuthenticationService {
         this.roleRepository=roleRepository;
     }
 
-    public User signup(RequestUserDTO requestUserDto) {
+    public User signup(RequestUserDTO req) {
         User user = new User();
-        user.setUsername(requestUserDto.getUsername());
-        user.setEmail(requestUserDto.getEmail());
-        user.setPassword(passwordEncoder.encode(requestUserDto.getPassword()));
+        user.setDisplayUsername(req.getUsername());
+        user.setEmail(req.getEmail());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
 
-        // Pretpostavljamo da requestUserDto.getRoles() vraća List<String> sa imenima rola
-        Role roles = requestUserDto.getRoles();
-                
-        user.setRoles(roles); // Postavljanje liste rola
+        String requested = (req.getRole() == null || req.getRole().isBlank()) ? "USER" : req.getRole().trim();
+        Role role = roleRepository.findByName(requested)
+              .orElseGet(() -> roleRepository.save(new Role(null, requested)));
 
+        user.setRole(role);
         return userRepository.save(user);
     }
+
 
 
 

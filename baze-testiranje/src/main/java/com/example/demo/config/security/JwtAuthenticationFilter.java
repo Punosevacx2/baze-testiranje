@@ -72,8 +72,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-
         filterChain.doFilter(request, response);
-    
     }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest req) {
+        String p = req.getRequestURI();
+        return "OPTIONS".equalsIgnoreCase(req.getMethod())
+              || p.startsWith("/api-docs")        // <— ovde umesto /v3/api-docs
+              || p.startsWith("/swagger-ui")
+              || p.equals("/swagger-ui.html")     // <— dodaj
+              || p.equals("/")
+              || p.startsWith("/ping")
+              || p.startsWith("/auth")
+              || p.startsWith("/actuator")
+              || p.startsWith("/public/");
+    }
+
 }

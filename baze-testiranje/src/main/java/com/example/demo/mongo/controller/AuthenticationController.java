@@ -4,7 +4,7 @@ package com.example.demo.mongo.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.BeanUtils;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.DTO.LoginResponseDTO;
 import com.example.demo.DTO.RequestUserDTO;
-import com.example.demo.DTO.ResponseUserDTO;
 import com.example.demo.DTO.Userlogindto;
 import com.example.demo.mongo.entities.Role;
 import com.example.demo.mongo.entities.User;
@@ -29,8 +28,9 @@ import com.example.demo.mongo.service.JwtService;
 import com.example.demo.neo4j.entities.UserNode;
 import com.example.demo.neo4j.service.UserNodeService;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 
 @RequestMapping("/auth")
 @RestController
@@ -64,39 +64,36 @@ public class AuthenticationController {
 
     @Operation(summary = "Sign up for the account", description = "Create user account")
     @PostMapping("/signup")
-    public ResponseEntity<LoginResponseDTO> register(@Valid @RequestBody RequestUserDTO requestUserDto) {
+    public ResponseEntity<LoginResponseDTO> register(@Valid @RequestBody RequestUserDTO req) {
 
+        // 1) Kreiraj usera
         User user = new User();
-        user.setUsername(requestUserDto.getUsername());
-        user.setEmail(requestUserDto.getEmail());
-        user.setPassword(passwordEncoder.encode(requestUserDto.getPassword()));
+        // "username" iz DTO može biti display name; za Security username = email
+        user.setDisplayUsername(req.getUsername());   // opcionalno, ako ti treba display ime
+        user.setEmail(req.getEmail());                // <-- važno: username za security = email
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
 
-        // Default role
-        Role role = roleRepository.findByName("USER");
-        if (role == null) {
-            throw new RuntimeException("Default role USER not found");
-        }
-        user.setRoles(role);  // sada lista rola
+        // 2) Dodeli default rolu USER (kreiraj ako ne postoji ili koristi seeder)
+        Role userRole = roleRepository.findByName("USER")
+              .orElseGet(() -> roleRepository.save(new Role(null, "USER")));
+        user.setRole(userRole);                       // <-- sada je single Role, ne Optional/lista
 
-        User savedUser = userRepository.save(user);
+        // 3) Sačuvaj u bazi
+        User saved = userRepository.save(user);
 
-        // Neo4j user
-        UserNode userNode = new UserNode(savedUser.getId());
-        userNodeService.createUserNode(userNode);
+        // 4) Neo4j user node (ako koristiš)
+        userNodeService.createUserNode(new UserNode(saved.getId()));
 
-        // Generisanje tokena
-        Map<String, String> tokens = jwtService.generateTokens(savedUser);
+        // 5) Generiši tokene (subject = email)
+        Map<String, String> tokens = jwtService.generateTokens(saved);
 
-        LoginResponseDTO loginResponseDTO = new LoginResponseDTO(
-                tokens.get("accessToken"),
-                tokens.get("refreshToken"),
-                jwtService.getExpirationTime()
+        LoginResponseDTO body = new LoginResponseDTO(
+              tokens.get("accessToken"),
+              tokens.get("refreshToken"),
+              jwtService.getExpirationTime()
         );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(loginResponseDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
-
-
 
 
     @Operation(summary = "Login to the application", description = "Login with the valid user credentials and obtain JWT token")
