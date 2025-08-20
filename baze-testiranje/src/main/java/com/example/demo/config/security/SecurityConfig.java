@@ -42,12 +42,7 @@ public class SecurityConfig {
     }
 
 
-    @Bean
-    public GrantedAuthoritiesMapper authoritiesMapper() {
-        SimpleAuthorityMapper authorityMapper = new SimpleAuthorityMapper();
-        authorityMapper.setPrefix("ROLE_"); // Ensure roles are prefixed correctly
-        return authorityMapper;
-    }
+   
 
 }
 

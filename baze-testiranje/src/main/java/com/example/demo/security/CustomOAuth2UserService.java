@@ -58,7 +58,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             // Postavi default rolu
             Role userRole = roleRepository.findByName("ROLE_USER");
-            newUser.setRoles(userRole);
+          //  newUser.setRoles(userRole);
 
             userRepository.save(newUser);
         }

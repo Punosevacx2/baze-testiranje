@@ -29,6 +29,7 @@ import com.example.demo.mongo.service.JwtService;
 import com.example.demo.neo4j.entities.UserNode;
 import com.example.demo.neo4j.service.UserNodeService;
 
+import java.util.List;
 import java.util.Map;
 
 @RequestMapping("/auth")
@@ -63,48 +64,52 @@ public class AuthenticationController {
 
     @Operation(summary = "Sign up for the account", description = "Create user account")
     @PostMapping("/signup")
-    public ResponseEntity<ResponseUserDTO> register(@Valid @RequestBody RequestUserDTO requestUserDto) {
-        
-        // 1. Kreiranje i popunjavanje User entiteta
+    public ResponseEntity<LoginResponseDTO> register(@Valid @RequestBody RequestUserDTO requestUserDto) {
+
         User user = new User();
         user.setUsername(requestUserDto.getUsername());
         user.setEmail(requestUserDto.getEmail());
         user.setPassword(passwordEncoder.encode(requestUserDto.getPassword()));
 
-        // Postavljanje role (pretpostavljamo da postoji role "USER")
+        // Default role
         Role role = roleRepository.findByName("USER");
-        if(role == null){
+        if (role == null) {
             throw new RuntimeException("Default role USER not found");
         }
-        user.setRoles(role);
+        user.setRoles(role);  // sada lista rola
 
-        // 2. Čuvanje korisnika u MongoDB
         User savedUser = userRepository.save(user);
 
-        // 3. Kreiranje UserNode u Neo4j
+        // Neo4j user
         UserNode userNode = new UserNode(savedUser.getId());
         userNodeService.createUserNode(userNode);
 
-        // 4. Priprema Response DTO
-        ResponseUserDTO responseUserDTO = new ResponseUserDTO();
-        responseUserDTO.setId(savedUser.getId());
-        responseUserDTO.setUsername(savedUser.getUsername());
-        responseUserDTO.setEmail(savedUser.getEmail());
-        responseUserDTO.setRole(savedUser.getRoles());
-        responseUserDTO.setPasswort(savedUser.getPassword());
+        // Generisanje tokena
+        Map<String, String> tokens = jwtService.generateTokens(savedUser);
 
-        // 5. Logovanje (opciono)
-        System.out.println(responseUserDTO.toString());
+        LoginResponseDTO loginResponseDTO = new LoginResponseDTO(
+                tokens.get("accessToken"),
+                tokens.get("refreshToken"),
+                jwtService.getExpirationTime()
+        );
 
-        // 6. Vraćanje odgovora sa HTTP 201 CREATED
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseUserDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(loginResponseDTO);
     }
+
+
 
 
     @Operation(summary = "Login to the application", description = "Login with the valid user credentials and obtain JWT token")
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> authenticate(@Valid @RequestBody Userlogindto loginUserDto) {
+    public ResponseEntity<ResponseCookie> authenticate(@Valid @RequestBody Userlogindto loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
+//        System.out.println(authenticatedUser.getEmail());
+//        System.out.println(authenticatedUser.getId());
+//        System.out.println(authenticatedUser.getUsername());
+//        System.out.println(authenticatedUser.getRoles());
+//        
+//        
+        
         Map<String, String> tokens = jwtService.generateTokens(authenticatedUser);
         LoginResponseDTO loginResponseDTO = new LoginResponseDTO(tokens.get("accessToken"), tokens.get("refreshToken"), jwtService.getExpirationTime());
 
@@ -121,12 +126,11 @@ public class AuthenticationController {
                 .path("/")
                 .maxAge(60 * 60 * 24 * 30) // 30 days
                 .build();
-
         return ResponseEntity
                 .ok()
                 .header("Set-Cookie", accessTokenCookie.toString())
                 .header("Set-Cookie", refreshTokenCookie.toString())
-                .body(loginResponseDTO);
+                .body(accessTokenCookie);
     }
 
 //    @Operation(summary = "Token refresh", description = "Refresh the JWT token")

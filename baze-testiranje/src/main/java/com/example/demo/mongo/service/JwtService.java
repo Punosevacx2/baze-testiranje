@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.mongo.entities.Role;
 import com.example.demo.mongo.entities.User;
 import com.example.demo.mongo.repository.UserRepository;
 
@@ -33,7 +34,7 @@ public class JwtService {
     @Autowired
     private UserRepository userRepository;
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -66,18 +67,20 @@ public class JwtService {
             User userDetails,
             long expiration
     ) {
-        return Jwts
-                .builder()
+        // Uzmi direktno Role objekat (jer korisnik ima samo jednu rolu)
+        Role role = userDetails.getRoles();
+        String roleName = role != null ? role.getName() : "USER"; // fallback na "USER" ako nije postavljeno
+
+        return Jwts.builder()
                 .setClaims(extraClaims)
-                .claim("role", userDetails.getRoles().getName())
+                .claim("role", roleName)          // jedna rola kao string
                 .claim("userId", userDetails.getId())
-                .setSubject(userDetails.getUsername())
+                .setSubject(userDetails.getEmail()) // ili username, kako koristiš
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
     public String getUsernameFromJWT(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
@@ -121,7 +124,7 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
+        final String username = extractEmail(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 

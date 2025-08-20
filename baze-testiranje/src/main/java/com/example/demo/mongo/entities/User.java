@@ -29,7 +29,7 @@ public class User implements UserDetails {
 	    private String postalCode;
 	    private String password;
 
-	   private Role roles;
+	    private Role roles;
 
     public User() {}
 
@@ -43,7 +43,7 @@ public class User implements UserDetails {
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + roles));
+        return Collections.singletonList(new SimpleGrantedAuthority(this.roles.getName()));
     }
 
     @Override
@@ -122,13 +122,17 @@ public class User implements UserDetails {
 		id=id2;
 	}
 
-	public void setRoles(Role role) {
+	public void setRoles(Role roles) {
 		// TODO Auto-generated method stub
-		roles=role;
+		this.roles=roles;
 	}
 
 	public Role getRoles() {
 		// TODO Auto-generated method stub
 		return roles;
 	}
+
+	
+
+	
 }
