@@ -21,6 +21,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Service
@@ -63,24 +64,26 @@ public class JwtService {
     }
 
     private String buildToken(
-            Map<String, Object> extraClaims,
-            User userDetails,
-            long expiration
+          Map<String, Object> extraClaims,
+          User userDetails,
+          long expiration
     ) {
-        // Uzmi direktno Role objekat (jer korisnik ima samo jednu rolu)
-        Role role = userDetails.getRoles();
-        String roleName = role != null ? role.getName() : "USER"; // fallback na "USER" ako nije postavljeno
+        Role role = userDetails.getRole();
+        String roleName = (role != null && role.getName() != null && !role.getName().isBlank())
+              ? role.getName().trim()
+              : "USER";
 
         return Jwts.builder()
-                .setClaims(extraClaims)
-                .claim("role", roleName)          // jedna rola kao string
-                .claim("userId", userDetails.getId())
-                .setSubject(userDetails.getEmail()) // ili username, kako koristiš
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
+              .setClaims(extraClaims)
+              .claim("role", roleName)
+              .claim("userId", userDetails.getId())
+              .setSubject(userDetails.getEmail())
+              .setIssuedAt(new Date(System.currentTimeMillis()))
+              .setExpiration(new Date(System.currentTimeMillis() + expiration))
+              .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+              .compact();
     }
+
     public String getUsernameFromJWT(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())

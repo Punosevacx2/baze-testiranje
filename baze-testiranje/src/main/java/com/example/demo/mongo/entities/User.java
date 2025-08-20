@@ -1,138 +1,202 @@
 package com.example.demo.mongo.entities;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.example.demo.mongo.entities.Role;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Document(collection = "users")
-public class User implements UserDetails {
+public class User implements UserDetails
+{
 
-	 @Id
-	    private String id;
+	@Id
+	private String id;
 
-	    private String email;
-	    private String username;
-	    private String firstName;
-	    private String lastName;
-	    private String country;
-	    private String city;
-	    private String postalCode;
-	    private String password;
+	@Indexed(unique = true)
+	private String email;
 
-	    private Role roles;
+	// (može ti trebati kao “display name”, ali Spring Security username vraćamo = email)
+	private String username;
 
-    public User() {}
+	private String firstName;
+	private String lastName;
+	private String country;
+	private String city;
+	private String postalCode;
 
-    public User(String username, String email, String password,Role role) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.roles = role;
-    }
+	private String password;
 
-    
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(this.roles.getName()));
-    }
+	// ❗️Ne koristiti Optional<Role> kao polje u entitetu
+	private Role role;  // jedna rola po korisniku (USER, ADMIN, ...)
 
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() { return true; }
-
-    @Override
-    public boolean isAccountNonLocked() { return true; }
-
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
-
-    @Override
-    public boolean isEnabled() { return true; }
-
-	public void setEmail(String email2) {
-		email=email2;
-		
+	public User()
+	{
 	}
 
-	public void setUsername(String username2) {
-	username=username2;
-		
+	public User(String username, String email, String password, Role role)
+	{
+		this.username = username;
+		this.email = email;
+		this.password = password;
+		this.role = role;
 	}
 
-	public void setFirstName(String object) {
-		firstName=object;
-		
+	// ===== UserDetails =====
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities()
+	{
+		if (role == null || role.getName() == null)
+			return List.of();
+		String name = role.getName().trim();
+		if (name.isEmpty())
+			return List.of();
+
+		// Normalizuj na ROLE_ prefiks tačno jednom, bez dupliranja
+		String springRole = name.regionMatches(true, 0, "ROLE_", 0, 5) ?
+				"ROLE_" + name.substring(5).trim().toUpperCase() :
+				"ROLE_" + name.toUpperCase();
+
+		return List.of(new SimpleGrantedAuthority(springRole));
 	}
 
-	public void setLastName(String object) {
-		lastName=object;
-		
+	// username za Security = email (pošto ti je JWT subject = email)
+	@Override
+	public String getUsername()
+	{
+		return this.email;
 	}
 
-	public void setCountry(String string) {
-		country=string;
-		
+	@Override
+	public String getPassword()
+	{
+		return this.password;
 	}
 
-	public void setCity(String string) {
-		city=string;
-		
+	@Override
+	public boolean isAccountNonExpired()
+	{
+		return true;
 	}
 
-	public void setPostalCode(String string) {
-		postalCode=string;
-		
+	@Override
+	public boolean isAccountNonLocked()
+	{
+		return true;
 	}
 
-	public void setPassword(String encode) {
-		password=encode;
-		
+	@Override
+	public boolean isCredentialsNonExpired()
+	{
+		return true;
 	}
 
-	public String getId() {
-		// TODO Auto-generated method stub
+	@Override
+	public boolean isEnabled()
+	{
+		return true;
+	}
+
+	// ===== Getteri / setteri =====
+
+	public String getId()
+	{
 		return id;
 	}
 
-	public void setId(String id2) {
-		// TODO Auto-generated method stub
-		id=id2;
+	public void setId(String id)
+	{
+		this.id = id;
 	}
 
-	public void setRoles(Role roles) {
-		// TODO Auto-generated method stub
-		this.roles=roles;
+	public String getEmail()
+	{
+		return email;
 	}
 
-	public Role getRoles() {
-		// TODO Auto-generated method stub
-		return roles;
+	public void setEmail(String email)
+	{
+		this.email = email;
 	}
 
-	
+	public String getDisplayUsername()
+	{
+		return username;
+	}
 
-	
+	public void setDisplayUsername(String username)
+	{
+		this.username = username;
+	}
+
+	public String getFirstName()
+	{
+		return firstName;
+	}
+
+	public void setFirstName(String v)
+	{
+		this.firstName = v;
+	}
+
+	public String getLastName()
+	{
+		return lastName;
+	}
+
+	public void setLastName(String v)
+	{
+		this.lastName = v;
+	}
+
+	public String getCountry()
+	{
+		return country;
+	}
+
+	public void setCountry(String v)
+	{
+		this.country = v;
+	}
+
+	public String getCity()
+	{
+		return city;
+	}
+
+	public void setCity(String v)
+	{
+		this.city = v;
+	}
+
+	public String getPostalCode()
+	{
+		return postalCode;
+	}
+
+	public void setPostalCode(String v)
+	{
+		this.postalCode = v;
+	}
+
+	public void setPassword(String password)
+	{
+		this.password = password;
+	}
+
+	public Role getRole()
+	{
+		return role;
+	}
+
+	public void setRole(Role role)
+	{
+		this.role = role;
+	}
 }
