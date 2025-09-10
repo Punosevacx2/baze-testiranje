@@ -57,6 +57,7 @@ public class RedisChatController {
 	    	System.out.println(chatMessage);
 	    	System.out.println("=============");
 	      String destination = "/topic/project/" + chatMessage.getProjectId();
+	      System.out.println("Broadcastujem na " + destination);
 	      messagingTemplate.convertAndSend(destination, chatMessage);
 	      
 	  }
