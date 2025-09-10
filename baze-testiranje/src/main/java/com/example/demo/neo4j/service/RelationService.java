@@ -2,6 +2,7 @@ package com.example.demo.neo4j.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +14,7 @@ import com.example.demo.neo4j.entities.UserNode;
 import com.example.demo.neo4j.repository.ProjectNodeRepository;
 import com.example.demo.neo4j.repository.TaskNodeRepository;
 import com.example.demo.neo4j.repository.UserNodeRepository;
-import com.example.demo.redis.NotificationPublisher;
+import com.example.demo.redis.RedisMessagePublisher;
 
 
 
@@ -22,13 +23,13 @@ public class RelationService {
 
 	private final UserNodeRepository userNodeRepository;
     private final TaskNodeRepository taskNodeRepository;
-    private final NotificationPublisher notificationPublisher;
+    private final RedisMessagePublisher redisMessagePublisher;
     private final ProjectNodeRepository projectNodeRepository;
 
-    public RelationService(UserNodeRepository userNodeRepository, TaskNodeRepository taskNodeRepository, NotificationPublisher notificationPublisher,ProjectNodeRepository projectNodeRepository) {
+    public RelationService(UserNodeRepository userNodeRepository, TaskNodeRepository taskNodeRepository, RedisMessagePublisher redisMessagePublisher,ProjectNodeRepository projectNodeRepository) {
         this.userNodeRepository = userNodeRepository;
         this.taskNodeRepository = taskNodeRepository;
-        this.notificationPublisher = notificationPublisher;
+        this.redisMessagePublisher = redisMessagePublisher;
         this.projectNodeRepository=projectNodeRepository;
     }
 
@@ -43,7 +44,9 @@ public class RelationService {
         UserNode collaborator = collaboratorOpt.get();
 
         user.getCollaborators().add(collaborator);
+        collaborator.getCollaborators().add(user);
         userNodeRepository.save(user);
+        userNodeRepository.save(collaborator);
 
         // ➕ Obaveštenje preko Redis-a (koristi Notification objekat)
         Notification notif = new Notification(
@@ -52,7 +55,7 @@ public class RelationService {
             String.format("Dodati ste kao saradnik korisniku %s", user.getUsername().toString())                          // ID korisnika kome je dodat
         );
 
-        notificationPublisher.publish("Notifikation",notif); // koristi novu publish funkciju
+       // redisMessagePublisher.publish("Notifikation",notif); // koristi novu publish funkciju
 
         return true;
     }
@@ -113,6 +116,11 @@ public class RelationService {
             return true;
         }
         
+        @Transactional(readOnly = true)
+        public Set<TaskNode> getTasksForProject(String projectId) {
+            Optional<ProjectNode> projectOpt = projectNodeRepository.findById(projectId);
+            return projectOpt.map(ProjectNode::getTasks).orElse(Set.of());
+        }
         
 //    @Transactional
 //    public boolean setManager(String userId, String managerId) {

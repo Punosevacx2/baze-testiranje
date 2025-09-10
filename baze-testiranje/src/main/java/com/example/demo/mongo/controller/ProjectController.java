@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,9 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.DTO.Projectdto;
 import com.example.demo.mongo.entities.Project;
+import com.example.demo.mongo.entities.User;
 import com.example.demo.mongo.service.ProjectService;
 import com.example.demo.neo4j.entities.ProjectNode;
+import com.example.demo.neo4j.entities.UserNode;
 import com.example.demo.neo4j.service.ProjectNodeService;
+import com.example.demo.neo4j.service.RelationService;
+import com.example.demo.neo4j.service.UserNodeService;
 
 @RestController
 @RequestMapping("/projects")
@@ -27,11 +33,17 @@ import com.example.demo.neo4j.service.ProjectNodeService;
 public class ProjectController {
     private final ProjectService projectService;
     private final ProjectNodeService projectNodeService;
+    private final UserNodeService userNodeService;
+    private final RelationService relationService;
 
     public ProjectController(ProjectService projectService,
-    						ProjectNodeService projectNodeService) {
+    						ProjectNodeService projectNodeService,
+    						UserNodeService userNodeService,
+    						RelationService relationService) {
         this.projectService = projectService;
         this.projectNodeService=projectNodeService;
+        this.userNodeService=userNodeService;
+        this.relationService=relationService;
     }
 
     @GetMapping
@@ -54,14 +66,26 @@ public class ProjectController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public Project create(@RequestBody Project project) {
-    	Project savedProject = projectService.createProject(project);
+        // 1. Sačuvaj projekat u MongoDB
+        Project savedProject = projectService.createProject(project);
 
-    	ProjectNode projectNode = new ProjectNode(savedProject.getId());
-    	projectNodeService.createProject(projectNode);
+        // 2. Kreiraj čvor projekta u Neo4j
+        ProjectNode projectNode = new ProjectNode(savedProject.getId());
+        projectNodeService.createProject(projectNode);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        
+
+        // 4. Napravi vezu u Neo4j (MENADŽER -> PROJEKAT)
+        relationService.addUserToProject(currentUser.getId(), projectNode.getId());
 
         return savedProject;
     }
+    
+    
 
     @PutMapping("/{id}")
     public Project update(@PathVariable String id, @RequestBody Project project) {

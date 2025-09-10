@@ -2,6 +2,7 @@ package com.example.demo.mongo.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -36,4 +37,10 @@ public class ProjectService {
     public void deleteProject(String id) {
         projectRepository.deleteById(id);
     }
+
+	public List<Project> findAllById(Set<String> projectIds) {
+		// TODO Auto-generated method stub
+		return  projectRepository.findAllById(projectIds);
+		
+	}
 }

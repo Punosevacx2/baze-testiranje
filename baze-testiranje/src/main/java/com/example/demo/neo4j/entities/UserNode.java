@@ -7,6 +7,8 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Node("User")
 public class UserNode {
 
@@ -18,6 +20,7 @@ public class UserNode {
 
     
     @Relationship(type = "WORKS_ON")
+    @JsonManagedReference
     private Set<ProjectNode> projects = new HashSet<>();
     // Constructors, getters, setters
 

@@ -4,8 +4,9 @@ import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.example.demo.mongo.entities.ChatMessage;
+import com.example.demo.mongo.entities.ProjectMessage;
 
-public interface ChatMessageRepository extends MongoRepository<ChatMessage, String> {
-    List<ChatMessage> findByTaskIdOrderByTimestampAsc(String taskId);
+public interface ChatMessageRepository extends MongoRepository<ProjectMessage, String> {
+	List<ProjectMessage> findByProjectIdOrderByTimestampAsc(String projectId);
+	  List<ProjectMessage> findByProjectId(String projectId);
 }

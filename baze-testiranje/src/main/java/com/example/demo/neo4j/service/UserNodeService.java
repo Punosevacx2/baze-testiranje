@@ -1,12 +1,15 @@
 package com.example.demo.neo4j.service;
 
 
+import com.example.demo.neo4j.entities.ProjectNode;
 import com.example.demo.neo4j.entities.UserNode;
 import com.example.demo.neo4j.repository.UserNodeRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserNodeService {
@@ -38,6 +41,11 @@ public class UserNodeService {
         userNodeRepository.deleteById(id);
     }
 
+    public Set<ProjectNode> getProjectsForUser(String userId) {
+        return userNodeRepository.findById(userId)
+                .map(UserNode::getProjects)
+                .orElse(Collections.emptySet());
+    }
     
 }
 

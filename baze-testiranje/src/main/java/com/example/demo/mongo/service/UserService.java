@@ -1,7 +1,9 @@
 package com.example.demo.mongo.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -42,5 +44,8 @@ public class UserService {
 
     public void deleteUser(String id) {
         userRepository.deleteById(id);
+    }
+    public Set<User> findUsersByIds(Set<String> ids) {
+        return new HashSet<>(userRepository.findAllById(ids));
     }
 }

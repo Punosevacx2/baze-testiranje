@@ -1,11 +1,14 @@
 package com.example.demo.mongo.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import com.example.demo.mongo.entities.Task;
+import com.example.demo.mongo.entities.User;
 import com.example.demo.mongo.repository.TaskRepository;
 
 @Service
@@ -35,5 +38,9 @@ public class TaskService {
 
     public void deleteTask(String id) {
         taskRepository.deleteById(id);
+    }
+    
+    public Set<Task> findUsersByIds(Set<String> ids) {
+        return new HashSet<>(taskRepository.findAllById(ids));
     }
 }

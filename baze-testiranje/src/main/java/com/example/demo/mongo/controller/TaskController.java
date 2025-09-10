@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.DTO.TaskRequestDTO;
 import com.example.demo.DTO.Taskdto;
 import com.example.demo.DTO.Userdto;
 import com.example.demo.mongo.entities.Task;
@@ -37,11 +38,19 @@ public class TaskController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<Task> getAll() {
-        return taskService.getAllTasks();
-    }
+ // @PreAuthorize("hasRole('ADMIN')")
+ public List<TaskRequestDTO> getAll() {
+     List<Task> tasks = taskService.getAllTasks();
 
+     // mapiranje Task -> TaskDTO
+     return tasks.stream()
+                 .map(task -> new TaskRequestDTO(
+                         task.getId(),
+                         task.getTitle(),
+                         task.getStatus()//ili task.getStatus().name() ako DTO koristi String
+                 ))
+                 .toList();
+ }
     @GetMapping("/{id}")
     public ResponseEntity<Taskdto> getById(@PathVariable String id) {
     	Optional<Task> mongoTaskOpt = taskService.getTaskById(id);

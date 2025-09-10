@@ -22,7 +22,7 @@ public class RequestUserDTO {
 
     protected String password;
 
-    protected Role roles;
+    protected RoleDTO roles;
 
 
 	public String getUsername() {
@@ -40,7 +40,7 @@ public class RequestUserDTO {
 		return password;
 	}
 
-	public Role getRoles() {
+	public RoleDTO getRoles() {
 		// TODO Auto-generated method stub
 		return roles;
 	}

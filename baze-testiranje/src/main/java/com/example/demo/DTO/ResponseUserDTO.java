@@ -37,7 +37,7 @@ public class ResponseUserDTO extends RequestUserDTO {
 	}
 
 
-	public void setRole(Role roles) {
+	public void setRole(RoleDTO roles) {
 		// TODO Auto-generated method stub
 		this.roles=roles;
 	}

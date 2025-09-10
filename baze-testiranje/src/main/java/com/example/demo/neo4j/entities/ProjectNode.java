@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Node("Project")
 public class ProjectNode {
 
@@ -17,6 +19,7 @@ public class ProjectNode {
     private Set<TaskNode> tasks = new HashSet<>();
     
     @Relationship(type = "HAS_MEMBER")
+    @JsonBackReference
     private Set<UserNode> members = new HashSet<>();
 
 	public ProjectNode() {}
@@ -42,6 +45,12 @@ public class ProjectNode {
 	public void setMembers(HashSet hashSet) {
 		members=hashSet;
 	}
+	public String getId() {
+        return id;
+    }
 
+    public void setId(String id) {
+        this.id = id;
+    }
     // Constructors, getteri, setteri...
 }

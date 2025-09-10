@@ -17,12 +17,11 @@ public class Userdto implements Serializable{
 	private User user;
     private UserNode userNode;
 
-    public Userdto(User user, UserNode userNode) {
-        this.user = user;
-        this.userNode = userNode;
-    }
+    
 
-    public User getUser() {
+    
+
+	public User getUser() {
         return user;
     }
 

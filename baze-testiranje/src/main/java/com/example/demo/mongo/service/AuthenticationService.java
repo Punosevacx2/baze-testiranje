@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.DTO.RequestUserDTO;
+import com.example.demo.DTO.RoleDTO;
 import com.example.demo.DTO.Userlogindto;
 import com.example.demo.mongo.entities.Role;
 import com.example.demo.mongo.entities.User;
@@ -40,9 +41,10 @@ public class AuthenticationService {
         user.setPassword(passwordEncoder.encode(requestUserDto.getPassword()));
 
         // Pretpostavljamo da requestUserDto.getRoles() vraća List<String> sa imenima rola
-        Role roles = requestUserDto.getRoles();
-                
-        user.setRoles(roles); // Postavljanje liste rola
+        RoleDTO roles = requestUserDto.getRoles();
+        Role role = roleRepository.findByName(requestUserDto.getRoles().getName());
+        user.setRoles(role);
+        user.setRoles(role); // Postavljanje liste rola
 
         return userRepository.save(user);
     }

@@ -72,7 +72,9 @@ public class AuthenticationController {
         user.setPassword(passwordEncoder.encode(requestUserDto.getPassword()));
 
         // Default role
-        Role role = roleRepository.findByName("USER");
+        
+        Role role = roleRepository.findByName(requestUserDto.getRoles().getName());
+        user.setRoles(role);
         if (role == null) {
             throw new RuntimeException("Default role USER not found");
         }

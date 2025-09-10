@@ -30,7 +30,7 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource)) // Use the CORS configuration
                 .csrf((csrf) -> csrf.disable())
                 .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers( "/auth/**", "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                        authorize -> authorize.requestMatchers( "/ws/**","/auth/**", "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated())
