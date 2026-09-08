@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -88,6 +89,7 @@ public class RelationController {
     }
     
     @PostMapping("/{projectId}/add-user/{userId}")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('ADMIN')")
     public ResponseEntity<String> addUserToProject(@PathVariable String projectId, @PathVariable String userId) {
         boolean success = projectNodeService.addUserToProject(userId, projectId);
         if (success) {

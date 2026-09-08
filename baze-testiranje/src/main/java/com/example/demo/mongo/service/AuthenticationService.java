@@ -55,6 +55,14 @@ public class AuthenticationService {
         authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginUserDTO.getEmail(), loginUserDTO.getPassword()));
         User user = userRepository.findByEmail(loginUserDTO.getEmail()).orElseThrow();
+
+        System.out.println("=== Korisnik se ulogovao ===");
+        System.out.println("ID:       " + user.getId());
+        System.out.println("Username: " + user.getUsername());
+        System.out.println("Email:    " + user.getEmail());
+        System.out.println("Rola:     " + (user.getRoles() != null ? user.getRoles().getName() : "N/A"));
+        System.out.println("===========================");
+
         return user;
     }
 

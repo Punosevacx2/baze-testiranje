@@ -41,25 +41,18 @@ public class RedisChatController {
 	  }
 
 	  
-	  @MessageMapping("/chat.sendMessage") // endpoint na koji šalje frontend
-	  @SendTo("/topic/project/{projectId}")
+	  @MessageMapping("/chat.sendMessage")
 	  public void sendMessage(@Payload MessageDTO chatMessage) {
-	      // dinamički topic po projectId
-		  ProjectMessage pm= new ProjectMessage();
-	    	pm.setContent(chatMessage.getContent());
-	    	pm.setProjectId(chatMessage.getProjectId());
-	    	pm.setSenderName(chatMessage.getSenderName());
-	    	pm.setSenderId(chatMessage.getSenderId());
-	    	pm.setTimestamp(chatMessage.getTimestamp());
-	        // Svaku poruku objavi u Redis kanal za dati projekat
-	    	chatMessageRepository.save(pm);
-	    	System.out.println("=============");
-	    	System.out.println(chatMessage);
-	    	System.out.println("=============");
-	      String destination = "/topic/project/" + chatMessage.getProjectId();
-	      System.out.println("Broadcastujem na " + destination);
-	      messagingTemplate.convertAndSend(destination, chatMessage);
-	      
+		  ProjectMessage pm = new ProjectMessage();
+		  pm.setContent(chatMessage.getContent());
+		  pm.setProjectId(chatMessage.getProjectId());
+		  pm.setSenderName(chatMessage.getSenderName());
+		  pm.setSenderId(chatMessage.getSenderId());
+		  pm.setTimestamp(LocalDateTime.now());
+		  chatMessageRepository.save(pm);
+
+		  String destination = "/topic/project/" + chatMessage.getProjectId();
+		  messagingTemplate.convertAndSend(destination, pm);
 	  }
 	  
 	    
